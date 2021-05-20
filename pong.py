@@ -1,31 +1,11 @@
 #Import libraries
 import picounicorn
 import utime
+from common import hsv_to_rgb
+from alphanumerics import scoredict, textdict
+
 picounicorn.init()
 
-# From CPython Lib/colorsys.py
-def hsv_to_rgb(h, s, v):
-    if s == 0.0:
-        return v, v, v
-    i = int(h * 6.0)
-    f = (h * 6.0) - i
-    p = v * (1.0 - s)
-    q = v * (1.0 - s * f)
-    t = v * (1.0 - s * (1.0 - f))
-    i = i % 6
-    if i == 0:
-        return v, t, p
-    if i == 1:
-        return q, v, p
-    if i == 2:
-        return p, v, t
-    if i == 3:
-        return p, q, v
-    if i == 4:
-        return t, p, v
-    if i == 5:
-        return v, p, q
-        
 #Define setup variables
 w = picounicorn.get_width()#16
 h = picounicorn.get_height()#7
@@ -72,99 +52,6 @@ pongtitle=[["RRRRRRRRRRRRRRRR"],
            ["RRRRRRRRRRRRRRRR"]]
 
 BLANKSECTION= ["   " for i in range(h)] 
-
-NUMZERO=["   ",
-         "XXX",
-         "X X",
-         "X X",
-         "X X",
-         "XXX",
-         "   "]
-         
-NUMONE=["   ",
-        " X ",
-        "XX ",
-        " X ",
-        " X ",
-        "XXX",
-        "   "]
-        
-NUMTWO=["   ",
-        "XXX",
-        "  X",
-        "XXX",
-        "X  ",
-        "XXX",
-        "   "]
-        
-NUMTHREE=["   ",
-          "XXX",
-          "  X",
-          "XXX",
-          "  X",
-          "XXX",
-          "   "]
-
-NUMFOUR=["   ",
-         "X X",
-         "X X",
-         "XXX",
-         "  X",
-         "  X",
-         "   "]
-
-NUMFIVE=["   ",
-          "XXX",
-          "X  ",
-          "XXX",
-          "  X",
-          "XXX",
-          "   "]
-
-DASH=["    ",
-      "    ",
-      "    ",
-      " XX ",
-      "    ",
-      "    ",
-      "    "]
-         
-LETTERW=["     ",
-         "X   X",
-         "X   X",
-         "X   X",
-         "X X X",
-         "XXXXX",
-         "     "]
- 
-LETTERI=["   ",
-         "XXX",
-         " X ",
-         " X ",
-         " X ",
-         "XXX",
-         "   "]
- 
-LETTERN=["    ",
-         "X  X",
-         "XX X",
-         "X XX",
-         "X  X",
-         "X  X",
-         "    "]
-
-PUNCEXCALM=["  ",
-            "X ",
-            "X ",
-            "X ",
-            "  ",
-            "X ",
-            "  "]
-
-#Create dictionaries to store scoring numbers/text
-scoredict={0:NUMZERO,1:NUMONE,2:NUMTWO,3:NUMTHREE,4:NUMFOUR,5:NUMFIVE,"dash":DASH}
-textdict={"W":LETTERW,"I":LETTERI,"N":LETTERN,"!":PUNCEXCALM}
-
 
 #Function to clear display by setting pixels to black
 def cleardisplay():
