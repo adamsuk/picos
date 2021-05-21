@@ -3,87 +3,68 @@ import picounicorn
 import utime
 from common import hsv_to_rgb
 from alphanumerics import scoredict, textdict
+from picodisplay import cleardisplay, updatedisplay, scrolldisplay
 
-picounicorn.init()
 
-#Define setup variables
-w = picounicorn.get_width()#16
-h = picounicorn.get_height()#7
-startballx=7
-startbally=3
-startdirH=1
-startdirV=0
-startscoreXY=0
-startscoreAB=0
-onlistAB=[2,3,4]
-onlistXY=[2,3,4]
+class PicoGames:
+    def __init__(self):
+        self.pu = picounicorn.init()
 
-#Create lists of pixels for the height/width of the whole display/ball area
-listW=[]#makes a list 0-15
-for i in range(w):
-    listW.append(i)
+        #Define setup variables
+        w = self.pu.get_width()#16
+        h = self.pu.get_height()#7
+        startballx=7
+        startbally=3
+        startdirH=1
+        startdirV=0
+        startscoreXY=0
+        startscoreAB=0
+        onlistAB=[2,3,4]
+        onlistXY=[2,3,4]
 
-listH=[]#makes a list 0-6
-for i in range(h):
-    listH.append(i)
-    
-listWball=[]#makes a list 1-14
-for i in range(1,15):
-    listWball.append(i)
+        #Create lists of pixels for the height/width of the whole display/ball area
+        listW=[]#makes a list 0-15
+        for i in range(w):
+            listW.append(i)
 
-listHball=[]#makes a list 0-6
-for i in range(0,7):
-    listHball.append(i)
-    
+        listH=[]#makes a list 0-6
+        for i in range(h):
+            listH.append(i)
+            
+        listWball=[]#makes a list 1-14
+        for i in range(1,15):
+            listWball.append(i)
 
-# Define colours
-playerXYcolours=(0,114,178)
-playerABcolours=(255,70,160)
-ballcolours=playerABcolours
+        listHball=[]#makes a list 0-6
+        for i in range(0,7):
+            listHball.append(i)
+            
 
-#Set constant variables for pong title, scoring and win message
+        # Define colours
+        playerXYcolours=(0,114,178)
+        playerABcolours=(255,70,160)
+        ballcolours=playerABcolours
+        
+        self.colourmap = {"X": [255,255,255],
+                          "R": [int(c * 255) for c in hsv_to_rgb(x / w, y / h, 1.0)],
+                          "D": [200,200,40],
+                          "A": playerABcolours,
+                          "Y": playerXYcolours,
+                          "unassigned": [0,0,0]
+                          }
 
-pongtitle=[["RRRRRRRRRRRRRRRR"],
-           ["   R   R   R   R"],
-           [" R R R R R R R R"],
-           ["   R R R R R   R"],
-           [" RRR R R R RRR R"],
-           [" RRR   R R R   R"],
-           ["RRRRRRRRRRRRRRRR"]]
+        #Set constant variables for pong title, scoring and win message
 
-BLANKSECTION= ["   " for i in range(h)] 
+        pongtitle=[["RRRRRRRRRRRRRRRR"],
+                   ["   R   R   R   R"],
+                   [" R R R R R R R R"],
+                   ["   R R R R R   R"],
+                   [" RRR R R R RRR R"],
+                   [" RRR   R R R   R"],
+                   ["RRRRRRRRRRRRRRRR"]]
 
-#Function to clear display by setting pixels to black
-def cleardisplay():
-    for x in range(w):
-        for y in range(h):
-            picounicorn.set_pixel(x, y, 0, 0, 0)            
+        BLANKSECTION= ["   " for i in range(h)] 
 
-#Function to update display with letters/numbers
-def updatedisplay(displaymap):
-    x=0
-    y=0
-    for row in displaymap: 
-        for line in row:
-            for char in line:
-                if x < w and y <h:
-                    if char == "X":
-                        r, g, b = 255,255,255
-                    elif char == "R":  
-                        r, g, b = [int(c * 255) for c in hsv_to_rgb(x / w, y / h, 1.0)]
-                    elif char == "D":
-                        r, g, b = 200,200,40
-                    elif char == "A":
-                        r, g, b = playerABcolours
-                    elif char == "Y":
-                        r, g, b = playerXYcolours
-                    else:
-                        r,g,b=0,0,0
-                    picounicorn.set_pixel(x, y, r, g, b)    
-                x+=1
-            x=0
-        y+=1
-    return displaymap
 
 #Function to generate an 2D array to represent the current score in the format: PlayerABscore - PlayerXYscore
 def generatescore(scoreAB,scoreXY):
@@ -102,16 +83,6 @@ def generatemessage(winningcolour):
     fulldisplay = [["{} {} {} {}   ".format(text1[i],text2[i],text3[i],text4[i])] for i in range(h)]
     return fulldisplay
 
-#Function to make the "display map" seem as though it is "scrolling" (loop)
-def scrolldisplay(displaymap):
-    scrollmap=[]
-    rowcount=0
-    for row in displaymap:
-        scrollmap.append([])
-        for line in row:
-            scrollmap[rowcount]= [line[1:]+line[0]]
-        rowcount+=1
-    return scrollmap
 
 #Display the title screen for 2 seconds
 updatedisplay(pongtitle)
@@ -124,18 +95,18 @@ def ball(currentballx,currentbally,prevballx,prevbally,prevball2x,prevball2y,bal
             if x == currentballx:
                 if y == currentbally:
                     r,g,b=ballcolours
-                    picounicorn.set_pixel(x, y, r, g, b)
+                    self.pu.set_pixel(x, y, r, g, b)
             elif x == prevballx:
                 if y == prevbally:
                     r,g,b=[round(element * 0.3) for element in ballcolours]
-                    picounicorn.set_pixel(x, y, r, g, b)
+                    self.pu.set_pixel(x, y, r, g, b)
             elif x == prevball2x:
                 if y == prevball2y:
                     r,g,b=[round(element * 0.2) for element in ballcolours]
-                    picounicorn.set_pixel(x, y, r, g, b)          
+                    self.pu.set_pixel(x, y, r, g, b)          
             else:
                 r,g,b=0,0,0
-                picounicorn.set_pixel(x, y, r, g, b)
+                self.pu.set_pixel(x, y, r, g, b)
     return currentballx,currentbally,prevballx,prevbally,prevball2x,prevball2y
 
 #Initial invocation of "ball" function
@@ -156,7 +127,7 @@ def lightcontrolAB(onlistAB):
                 r,g,b=playerABcolours
             else:
                 r,g,b=0,0,0
-            picounicorn.set_pixel(x, y, r, g, b)
+            self.pu.set_pixel(x, y, r, g, b)
                 
 #Function to create playerXY paddle (in the last column)
 def lightcontrolXY(onlistXY):
@@ -166,7 +137,7 @@ def lightcontrolXY(onlistXY):
                 r,g,b=playerXYcolours
             else:
                 r,g,b=0,0,0
-            picounicorn.set_pixel(x, y, r, g, b)
+            self.pu.set_pixel(x, y, r, g, b)
   
 #Function to determine the ball colour & direction (based on it's position)and update scoring
 def ballposition(currentballx,currentbally,currentdirH,currentdirV,scoreAB,scoreXY,ballcolours,startdirH):
@@ -235,19 +206,20 @@ while True:
             utime.sleep(0.1)
         break
     else:
-        if picounicorn.is_pressed(picounicorn.BUTTON_A):
+        if self.pu.is_pressed(self.pu.BUTTON_A):
             if onlistAB[0]!=0:
                 onlistAB.insert(0,onlistAB[0]-1)
                 onlistAB=onlistAB[:-1]
-        elif picounicorn.is_pressed(picounicorn.BUTTON_B):
+        elif self.pu.is_pressed(self.pu.BUTTON_B):
             if onlistAB[-1]!=6:
                 onlistAB.insert(len(onlistAB),onlistAB[-1]+1)
                 onlistAB=onlistAB[1:]
-        if picounicorn.is_pressed(picounicorn.BUTTON_X):
+        if self.pu.is_pressed(self.pu.BUTTON_X):
             if onlistXY[0]!=0:
                 onlistXY.insert(0,onlistXY[0]-1)
                 onlistXY=onlistXY[:-1]
-        elif picounicorn.is_pressed(picounicorn.BUTTON_Y):
+        elif self.pu.is_pressed(self.pu.BUTTON_Y):
+            
             if onlistXY[-1]!=6:
                 onlistXY.insert(len(onlistXY),onlistXY[-1]+1)
                 onlistXY=onlistXY[1:]
