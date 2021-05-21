@@ -2,35 +2,16 @@
 import picounicorn
 import utime
 from alphanumerics import scoredict, textdict
-from picodisplay import cleardisplay, updatedisplay, scrolldisplay
+from display import cleardisplay, updatedisplay, scrolldisplay
 
 
 class PicoGames:
     def __init__(self):
-        self.pu = picounicorn.init()
+        picounicorn.init()
 
         #Define setup variables
-        self.startballx=7
-        self.startbally=3
-        self.startdirH=1
-        self.startdirV=0
-        self.onlistAB=[2,3,4]
-        self.onlistXY=[2,3,4]
-        self.ballx=self.startballx
-        self.bally=self.startbally
-        self.dirH=self.startdirH
-        self.dirV=self.startdirV
-        self.scoreAB=0
-        self.scoreXY=0
-
-        #Create lists of pixels for the height/width of the whole display/ball area
-        self.listWball=[]#makes a list 1-14
-        for i in range(1, self.pu.get_width()-1):
-            self.listWball.append(i)
-
-        self.listHball=[]#makes a list 0-6
-        for i in range(0, self.pu.get_height()):
-            self.listHball.append(i)
+        self.winning_score = 4
+        self.initialise_variables()
         
         # Define colours
         self.playerXYcolours=(0,114,178)
@@ -56,20 +37,56 @@ class PicoGames:
                    ["RRRRRRRRRRRRRRRR"]]
             
         #Display the title screen for 2 seconds
-        updatedisplay(pongtitle)
+        updatedisplay(pongtitle, self.colourmap)
         utime.sleep(2)
 
         #Initial invocation of "ball" function
         self.ball()
+        
+        # start the game!
+        self.run_game()
 
+    def initialise_variables(self):
+        """
+        A method used to initialise key variables for the game
+        """
+        self.startballx=7
+        self.startbally=3
+        self.startdirH=1
+        self.startdirV=0
+        self.onlistAB=[2,3,4]
+        self.onlistXY=[2,3,4]
+        self.ballx=self.startballx
+        self.bally=self.startbally
+        self.dirH=self.startdirH
+        self.dirV=self.startdirV
+        self.scoreAB=0
+        self.scoreXY=0
 
+        #Create lists of pixels for the height/width of the whole display/ball area
+        self.listW=[]#makes a list 0-15
+        for i in range(picounicorn.get_width()):
+            self.listW.append(i)
+
+        self.listH=[]#makes a list 0-6
+        for i in range(picounicorn.get_height()):
+            self.listH.append(i)
+        
+        self.listWball=[]#makes a list 1-14
+        for i in range(1, picounicorn.get_width()-1):
+            self.listWball.append(i)
+
+        self.listHball=[]#makes a list 0-6
+        for i in range(0, picounicorn.get_height()):
+            self.listHball.append(i)
+        
     #Function to generate an 2D array to represent the current score in the format: PlayerABscore - PlayerXYscore
     def generatescore(self):
         scoreABpix = [item.replace("X","A") for item in scoredict[self.scoreAB]]
         scoreXYpix = [item.replace("X","Y") for item in scoredict[self.scoreXY]]
         dashpix = [item.replace("X","D") for item in scoredict["dash"]]
-        BLANKSECTION= ["   " for i in range(self.pu.get_height())]
-        fulldisplay = [["{}{}{}{}{}".format(BLANKSECTION[i],scoreABpix[i],dashpix[i],scoreXYpix[i],BLANKSECTION[i])] for i in range(self.pu.get_height())]
+        BLANKSECTION= ["   " for i in range(picounicorn.get_height())]
+        fulldisplay = [["{}{}{}{}{}".format(BLANKSECTION[i],scoreABpix[i],dashpix[i],scoreXYpix[i],BLANKSECTION[i])] for i in range(picounicorn.get_height())]
         return fulldisplay
     
     #Function to generate a 2D array of specified text e.g. "WIN!"
@@ -78,7 +95,7 @@ class PicoGames:
         text2=[item.replace("X",winningcolour) for item in textdict["I"]]
         text3=[item.replace("X",winningcolour) for item in textdict["N"]]
         text4=[item.replace("X",winningcolour) for item in textdict["!"]]
-        fulldisplay = [["{} {} {} {}   ".format(text1[i],text2[i],text3[i],text4[i])] for i in range(self.pu.get_height())]
+        fulldisplay = [["{} {} {} {}   ".format(text1[i],text2[i],text3[i],text4[i])] for i in range(picounicorn.get_height())]
         return fulldisplay
 
     #Function to create the ball and ball trail(using previous ball co-ords)
@@ -96,18 +113,18 @@ class PicoGames:
                 if x == self.ballx:
                     if y == self.bally:
                         r,g,b=self.ballcolours
-                        self.pu.set_pixel(x, y, r, g, b)
+                        picounicorn.set_pixel(x, y, r, g, b)
                 elif x == prevballx:
                     if y == prevbally:
                         r,g,b=[round(element * 0.3) for element in self.ballcolours]
-                        self.pu.set_pixel(x, y, r, g, b)
+                        picounicorn.set_pixel(x, y, r, g, b)
                 elif x == prevball2x:
                     if y == prevball2y:
                         r,g,b=[round(element * 0.2) for element in self.ballcolours]
-                        self.pu.set_pixel(x, y, r, g, b)          
+                        picounicorn.set_pixel(x, y, r, g, b)          
                 else:
                     r,g,b=0,0,0
-                    self.pu.set_pixel(x, y, r, g, b)
+                    picounicorn.set_pixel(x, y, r, g, b)
         return self.ballx,self.bally,prevballx,prevbally,prevball2x,prevball2y
 
     #Function to create playerAB paddle (in the first column)
@@ -118,7 +135,7 @@ class PicoGames:
                     r,g,b = self.playerABcolours
                 else:
                     r,g,b=0,0,0
-                self.pu.set_pixel(x, y, r, g, b)
+                picounicorn.set_pixel(x, y, r, g, b)
     
     #Function to create playerXY paddle (in the last column)
     def lightcontrolXY(self):
@@ -128,7 +145,7 @@ class PicoGames:
                     r,g,b=self.playerXYcolours
                 else:
                     r,g,b=0,0,0
-                self.pu.set_pixel(x, y, r, g, b)
+                picounicorn.set_pixel(x, y, r, g, b)
     
     #Function to determine the ball colour & direction (based on it's position)and update scoring
     def ballposition(self):
@@ -148,7 +165,7 @@ class PicoGames:
                 self.dirH=self.startdirH
                 self.dirV=self.startdirV
                 cleardisplay()
-                updatedisplay(self.generatescore(self.scoreAB,self.scoreXY))
+                updatedisplay(self.generatescore(), self.colourmap)
                 utime.sleep(1)
         elif self.ballx == self.listWball[-1]:#if ball is in the furthest right column
             self.ballcolours=self.playerXYcolours
@@ -166,7 +183,7 @@ class PicoGames:
                 self.dirH=self.startdirH
                 self.dirV=self.startdirV
                 cleardisplay()
-                updatedisplay(self.generatescore(self.scoreAB,self.scoreXY))
+                updatedisplay(self.generatescore(), self.colourmap)
                 utime.sleep(1)
         elif self.ballx in self.listWball:
             if self.bally == self.listHball[0]:
@@ -179,44 +196,51 @@ class PicoGames:
         #Function which runs the game       
         while True:
             self.ballposition()
-            if self.scoreAB >=5 or self.scoreXY >=5:
-                if self.scoreAB>=5:
+            if self.scoreAB >= self.winning_score or self.scoreXY >= self.winning_score:
+                if self.scoreAB >= self.winning_score:
                     winningcolour="A"
                 else:
                     winningcolour="Y"
                 cleardisplay()
-                currentdisplaymap=updatedisplay(self.generatemessage(winningcolour))
+                currentdisplaymap=updatedisplay(self.generatemessage(winningcolour),
+                                                self.colourmap)
                 anyButton = False
                 while not anyButton:
-                    currentdisplaymap=updatedisplay(scrolldisplay(currentdisplaymap))
+                    currentdisplaymap=updatedisplay(scrolldisplay(currentdisplaymap),
+                                                    self.colourmap)
                     utime.sleep(0.1)
-                    """
-                    if self.pu.is_pressed(self.pu.BUTTON_A) or \
-                        self.pu.is_pressed(self.pu.BUTTON_B) or \
-                            self.pu.is_pressed(self.pu.BUTTON_X) or \
-                                self.pu.is_pressed(self.pu.BUTTON_Y):
+                    if picounicorn.is_pressed(picounicorn.BUTTON_A) or \
+                        picounicorn.is_pressed(picounicorn.BUTTON_B) or \
+                            picounicorn.is_pressed(picounicorn.BUTTON_X) or \
+                                picounicorn.is_pressed(picounicorn.BUTTON_Y):
                         anyButton = True
-                        break
-                    """
-                break
+                # reinitialise game
+                self.initialise_variables()
+                self.lightcontrolAB()
+                self.lightcontrolXY()
+                self.ball()
+                self.run_game()
             else:
-                if self.pu.is_pressed(self.pu.BUTTON_A):
-                    if onlistAB[0]!=0:
-                        onlistAB.insert(0,onlistAB[0]-1)
-                        onlistAB=onlistAB[:-1]
-                elif self.pu.is_pressed(self.pu.BUTTON_B):
-                    if onlistAB[-1]!=6:
-                        onlistAB.insert(len(onlistAB),onlistAB[-1]+1)
-                        onlistAB=onlistAB[1:]
-                if self.pu.is_pressed(self.pu.BUTTON_X):
-                    if onlistXY[0]!=0:
-                        onlistXY.insert(0,onlistXY[0]-1)
-                        onlistXY=onlistXY[:-1]
-                elif self.pu.is_pressed(self.pu.BUTTON_Y):
+                if picounicorn.is_pressed(picounicorn.BUTTON_A):
+                    if self.onlistAB[0]!=0:
+                        self.onlistAB.insert(0,self.onlistAB[0]-1)
+                        self.onlistAB=self.onlistAB[:-1]
+                elif picounicorn.is_pressed(picounicorn.BUTTON_B):
+                    if self.onlistAB[-1]!=6:
+                        self.onlistAB.insert(len(self.onlistAB),self.onlistAB[-1]+1)
+                        self.onlistAB=self.onlistAB[1:]
+                if picounicorn.is_pressed(picounicorn.BUTTON_X):
+                    if self.onlistXY[0]!=0:
+                        self.onlistXY.insert(0,self.onlistXY[0]-1)
+                        self.onlistXY=self.onlistXY[:-1]
+                elif picounicorn.is_pressed(picounicorn.BUTTON_Y):
                     
-                    if onlistXY[-1]!=6:
-                        onlistXY.insert(len(onlistXY),onlistXY[-1]+1)
-                        onlistXY=onlistXY[1:]
-            self.lightcontrolAB(onlistAB)
-            self.lightcontrolXY(onlistXY)
+                    if self.onlistXY[-1]!=6:
+                        self.onlistXY.insert(len(self.onlistXY),self.onlistXY[-1]+1)
+                        self.onlistXY=self.onlistXY[1:]
+            self.lightcontrolAB()
+            self.lightcontrolXY()
             utime.sleep(0.1)
+
+if __name__ == "__main__":
+    PicoGames()
