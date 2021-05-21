@@ -1,8 +1,9 @@
+from common import hsv_to_rgb
 
 #Function to clear display by setting pixels to black
 def cleardisplay(picounicorn):
-    for x in range(w):
-        for y in range(h):
+    for x in range(picounicorn.get_width()):
+        for y in range(picounicorn.get_width()):
             picounicorn.set_pixel(x, y, 0, 0, 0)            
 
 #Function to update display with letters/numbers
@@ -13,8 +14,11 @@ def updatedisplay(picounicorn, displaymap, colourdict):
         for line in row:
             for char in line:
                 if x < w and y <h:
-                    if char in colourdict.keys():  
-                        r, g, b = colourdict[char]
+                    if char in colourdict.keys():
+                        if colourdict.get(char) == "random":
+                            r, g, b = [int(c * 255) for c in hsv_to_rgb(x / picounicorn.get_width(), y / picounicorn.get_height(), 1.0)]
+                        else:
+                            r, g, b = colourdict[char]
                     else:
                         r, g, b = colourdict["unassigned"]
                     picounicorn.set_pixel(x, y, r, g, b)    
