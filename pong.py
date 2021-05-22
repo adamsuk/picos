@@ -10,7 +10,7 @@ class PicoGames:
         picounicorn.init()
 
         #Define setup variables
-        self.winning_score = 4
+        self.winning_score = 6
         self.initialise_variables()
         
         # Define colours
@@ -121,7 +121,7 @@ class PicoGames:
                 elif x == prevball2x:
                     if y == prevball2y:
                         r,g,b=[round(element * 0.2) for element in self.ballcolours]
-                        picounicorn.set_pixel(x, y, r, g, b)          
+                        picounicorn.set_pixel(x, y, r, g, b)
                 else:
                     r,g,b=0,0,0
                     picounicorn.set_pixel(x, y, r, g, b)
@@ -193,7 +193,7 @@ class PicoGames:
         self.ball()
 
     def run_game(self):
-        #Function which runs the game       
+        #Function which runs the game
         while True:
             self.ballposition()
             if self.scoreAB >= self.winning_score or self.scoreXY >= self.winning_score:
@@ -234,7 +234,6 @@ class PicoGames:
                         self.onlistXY.insert(0,self.onlistXY[0]-1)
                         self.onlistXY=self.onlistXY[:-1]
                 elif picounicorn.is_pressed(picounicorn.BUTTON_Y):
-                    
                     if self.onlistXY[-1]!=6:
                         self.onlistXY.insert(len(self.onlistXY),self.onlistXY[-1]+1)
                         self.onlistXY=self.onlistXY[1:]

@@ -1,50 +1,56 @@
-NUMZERO=["   ",
+import copy
+
+ascii_nums = {
+     0: ["   ",
          "XXX",
          "X X",
          "X X",
          "X X",
          "XXX",
-         "   "]
-         
-NUMONE=["   ",
+         "   "],
+    1: ["   ",
         " X ",
         "XX ",
         " X ",
         " X ",
         "XXX",
-        "   "]
-        
-NUMTWO=["   ",
+        "   "],
+    2: ["   ",
         "XXX",
         "  X",
         "XXX",
         "X  ",
         "XXX",
-        "   "]
-        
-NUMTHREE=["   ",
+        "   "],
+      3: ["   ",
           "XXX",
           "  X",
           "XXX",
           "  X",
           "XXX",
-          "   "]
-
-NUMFOUR=["   ",
+          "   "],
+     4: ["   ",
          "X X",
          "X X",
          "XXX",
          "  X",
          "  X",
-         "   "]
-
-NUMFIVE=["   ",
+         "   "],
+      5: ["   ",
           "XXX",
           "X  ",
           "XXX",
           "  X",
           "XXX",
+          "   "],
+      6: ["   ",
+          "XXX",
+          "X  ",
+          "XXX",
+          "X X",
+          "XXX",
           "   "]
+}
 
 DASH=["    ",
       "    ",
@@ -53,7 +59,7 @@ DASH=["    ",
       "    ",
       "    ",
       "    "]
-         
+
 LETTERW=["     ",
          "X   X",
          "X   X",
@@ -61,7 +67,7 @@ LETTERW=["     ",
          "X X X",
          "XXXXX",
          "     "]
- 
+
 LETTERI=["   ",
          "XXX",
          " X ",
@@ -69,7 +75,7 @@ LETTERI=["   ",
          " X ",
          "XXX",
          "   "]
- 
+
 LETTERN=["    ",
          "X  X",
          "XX X",
@@ -87,5 +93,6 @@ PUNCEXCALM=["  ",
             "  "]
 
 #Create dictionaries to store scoring numbers/text
-scoredict={0:NUMZERO,1:NUMONE,2:NUMTWO,3:NUMTHREE,4:NUMFOUR,5:NUMFIVE,"dash":DASH}
+scoredict = copy.deepcopy(ascii_nums)
+scoredict["dash"] = DASH
 textdict={"W":LETTERW,"I":LETTERI,"N":LETTERN,"!":PUNCEXCALM}
