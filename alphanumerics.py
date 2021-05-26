@@ -1,6 +1,4 @@
-import copy
-
-ascii_nums = {
+scoredict = {
      0: ["   ",
          "XXX",
          "X X",
@@ -59,14 +57,14 @@ ascii_nums = {
           "   "],
     8: ["   ",
           "XXX",
-          "X  X",
+          "X X",
           "XXX",
-          "X  X",
+          "X X",
           "XXX",
           "   "],
     9: ["   ",
           "XXX",
-          "X  X",
+          "X X",
           "XXX",
           "  X",
           "  X",
@@ -114,6 +112,5 @@ PUNCEXCALM=["  ",
             "  "]
 
 #Create dictionaries to store scoring numbers/text
-scoredict = copy.deepcopy(ascii_nums)
 scoredict["dash"] = DASH
 textdict={"W":LETTERW,"I":LETTERI,"N":LETTERN,"!":PUNCEXCALM}

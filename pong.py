@@ -10,7 +10,9 @@ class PicoGames:
         picounicorn.init()
 
         #Define setup variables
-        self.winning_score = 6
+        self.winning_score = 9
+        self.inf_paddles = False
+        self.wall_reflect = True
         self.initialise_variables()
         
         # Define colours
@@ -27,13 +29,12 @@ class PicoGames:
                           }
 
         #Set constant variables for pong title, scoring and win message
-
         pongtitle=[["RRRRRRRRRRRRRRRR"],
-                   ["   R   R   R   R"],
-                   [" R R R R R R R R"],
-                   ["   R R R R R   R"],
-                   [" RRR R R R RRR R"],
-                   [" RRR   R R R   R"],
+                   ["R   RRRR RRR   R"],
+                   ["R R RRRRRRRR R R"],
+                   ["R      R   R   R"],
+                   ["R RR R R R RRR R"],
+                   ["R RR   R R R   R"],
                    ["RRRRRRRRRRRRRRRR"]]
             
         #Display the title screen for 2 seconds
@@ -153,10 +154,20 @@ class PicoGames:
             self.ballcolours=self.playerABcolours
             if self.bally in self.onlistAB:
                 self.dirH=1
-                if self.bally == self.onlistAB[0]:
-                    self.dirV=-1
-                if self.bally == self.onlistAB[2]:
-                    self.dirV=1
+                if self.bally == self.onlistAB[0] and self.dirV == 0:
+                    self.dirV = -1
+                elif self.bally == self.onlistAB[1]:
+                    self.dirV = 0
+                elif self.bally == self.onlistAB[-1] and self.dirV == 0:
+                    self.dirV = 1
+                elif self.bally in [self.listHball[0], self.listHball[-1]]:
+                    self.dirV *= -1
+            elif self.bally == self.onlistAB[0] -1 and self.dirV == 1:
+                self.dirH = 1
+                self.dirV = -1
+            elif self.bally == self.onlistAB[-1] +1 and self.dirV == -1:
+                self.dirH = 1
+                self.dirV = 1
             else:
                 self.scoreXY+=1
                 self.startdirH=1
@@ -170,11 +181,21 @@ class PicoGames:
         elif self.ballx == self.listWball[-1]:#if ball is in the furthest right column
             self.ballcolours=self.playerXYcolours
             if self.bally in self.onlistXY:
-                self.dirH= -1
-                if self.bally == self.onlistXY[0]:
-                    self.dirV=-1
-                if self.bally == self.onlistXY[2]:
-                    self.dirV=1 
+                self.dirH=-1
+                if self.bally == self.onlistXY[0] and self.dirV == 0:
+                    self.dirV = -1
+                elif self.bally == self.onlistXY[1]:
+                    self.dirV = 0
+                elif self.bally == self.onlistXY[-1] and self.dirV == 0:
+                    self.dirV = 1
+                elif self.bally in [self.listHball[0], self.listHball[-1]]:
+                    self.dirV *= -1
+            elif self.bally == self.onlistXY[0] -1 and self.dirV == 1:
+                self.dirH = 1
+                self.dirV = -1
+            elif self.bally == self.onlistXY[-1] +1 and self.dirV == -1:
+                self.dirH = 1
+                self.dirV = 1
             else:
                 self.scoreAB+=1
                 self.startdirH=- 1
@@ -185,13 +206,26 @@ class PicoGames:
                 cleardisplay()
                 updatedisplay(self.generatescore(), self.colourmap)
                 utime.sleep(1)
-        elif self.ballx in self.listWball:
+        # reflect off wall
+        elif self.ballx in self.listWball and self.wall_reflect:
             if self.bally == self.listHball[0]:
                 self.dirV=1
             elif self.bally == self.listHball[-1]:
                 self.dirV=-1
+        elif self.ballx in self.listWball and not self.wall_reflect:
+            if self.bally == self.listHball[0]:
+                self.bally = self.listHball[-1]
+            elif self.bally == self.listHball[-1]:
+                self.bally = self.listHball[0]
         self.ball()
-
+    
+    def mirrored_list(lst, mirrored=False):
+        """
+        A method used to determine if a list is never ending (ie mirrored) or not
+        (ie fixed at the extremes).
+        """
+        pass
+    
     def run_game(self):
         #Function which runs the game
         while True:
@@ -225,17 +259,29 @@ class PicoGames:
                     if self.onlistAB[0]!=0:
                         self.onlistAB.insert(0,self.onlistAB[0]-1)
                         self.onlistAB=self.onlistAB[:-1]
+                    elif self.onlistAB[0] == 0 and self.inf_paddles:
+                        self.onlistAB.insert(0,6)
+                        self.onlistAB=self.onlistAB[:-1]                        
                 elif picounicorn.is_pressed(picounicorn.BUTTON_B):
                     if self.onlistAB[-1]!=6:
                         self.onlistAB.insert(len(self.onlistAB),self.onlistAB[-1]+1)
+                        self.onlistAB=self.onlistAB[1:]
+                    elif self.onlistAB[-1] == 6 and self.inf_paddles:
+                        self.onlistAB.insert(len(self.onlistAB),0)
                         self.onlistAB=self.onlistAB[1:]
                 if picounicorn.is_pressed(picounicorn.BUTTON_X):
                     if self.onlistXY[0]!=0:
                         self.onlistXY.insert(0,self.onlistXY[0]-1)
                         self.onlistXY=self.onlistXY[:-1]
+                    elif self.onlistXY[0] == 0 and self.inf_paddles:
+                        self.onlistXY.insert(0,6)
+                        self.onlistXY=self.onlistXY[:-1]
                 elif picounicorn.is_pressed(picounicorn.BUTTON_Y):
                     if self.onlistXY[-1]!=6:
                         self.onlistXY.insert(len(self.onlistXY),self.onlistXY[-1]+1)
+                        self.onlistXY=self.onlistXY[1:]
+                    elif self.onlistXY[-1] == 6 and self.inf_paddles:
+                        self.onlistXY.insert(len(self.onlistXY),0)
                         self.onlistXY=self.onlistXY[1:]
             self.lightcontrolAB()
             self.lightcontrolXY()

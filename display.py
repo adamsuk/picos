@@ -35,6 +35,6 @@ def scrolldisplay(displaymap):
     for row in displaymap:
         scrollmap.append([])
         for line in row:
-            scrollmap[rowcount]= [line[1:]+line[0]]
+            scrollmap[rowcount]= [line[-1] + line[:-1]]
         rowcount+=1
     return scrollmap
