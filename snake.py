@@ -11,38 +11,35 @@ class PicoGames:
 
         #Define setup variables
         self.winning_score = 9
-        self.inf_paddles = True
         self.wall_reflect = False
         self.initialise_variables()
         
         # Define colours
-        self.playerXYcolours=(0,114,178)
-        self.playerABcolours=(255,70,160)
-        self.ballcolours=self.playerABcolours
+        self.playercolours=(255,70,160)
+        self.ballcolours=self.playercolours
         
         self.colourmap = {"X": [255,255,255],
                           "R": "random",
                           "D": [200,200,40],
-                          "A": self.playerABcolours,
-                          "Y": self.playerXYcolours,
+                          "P": self.playercolours,
                           "unassigned": [0,0,0]
                           }
 
-        #Set constant variables for pong title, scoring and win message
-        pongtitle=[["RRRRRRRRRRRRRRRR"],
-                   ["R   RRRR RRR   R"],
-                   ["R R RRRRRRRR R R"],
-                   ["R      R   R   R"],
-                   ["R RR R R R RRR R"],
-                   ["R RR   R R R   R"],
-                   ["RRRRRRRRRRRRRRRR"]]
+        #Set constant variables for title
+        title=[["RRRRRRRRRRRRRRRR"],
+               ["RRRRRRRRRRRRRRRR"],
+               ["RRRRRRRRRRRRRRRR"],
+               ["RRRRRRRRRRRRRRRR"],
+               ["RRRRRRRRRRRRRRRR"],
+               ["RRRRRRRRRRRRRRRR"],
+               ["RRRRRRRRRRRRRRRR"]]
             
         #Display the title screen for 2 seconds
-        updatedisplay(pongtitle, self.colourmap)
+        updatedisplay(title, self.colourmap)
         utime.sleep(2)
 
         #Initial invocation of "ball" function
-        self.ball()
+        self.snake()
         
         # start the game!
         self.run_game()
@@ -55,14 +52,11 @@ class PicoGames:
         self.startbally=3
         self.startdirH=1
         self.startdirV=0
-        self.onlistAB=[2,3,4]
-        self.onlistXY=[2,3,4]
         self.ballx=self.startballx
         self.bally=self.startbally
         self.dirH=self.startdirH
         self.dirV=self.startdirV
-        self.scoreAB=0
-        self.scoreXY=0
+        self.score=0
 
         #Create lists of pixels for the height/width of the whole display/ball area
         self.listW=[]#makes a list 0-15
@@ -72,22 +66,11 @@ class PicoGames:
         self.listH=[]#makes a list 0-6
         for i in range(picounicorn.get_height()):
             self.listH.append(i)
-        
-        self.listWball=[]#makes a list 1-14
-        for i in range(1, picounicorn.get_width()-1):
-            self.listWball.append(i)
-
-        self.listHball=[]#makes a list 0-6
-        for i in range(0, picounicorn.get_height()):
-            self.listHball.append(i)
-        
+    
     #Function to generate an 2D array to represent the current score in the format: PlayerABscore - PlayerXYscore
     def generatescore(self):
-        scoreABpix = [item.replace("X","A") for item in scoredict[self.scoreAB]]
-        scoreXYpix = [item.replace("X","Y") for item in scoredict[self.scoreXY]]
-        dashpix = [item.replace("X","D") for item in scoredict["dash"]]
-        BLANKSECTION= ["   " for i in range(picounicorn.get_height())]
-        fulldisplay = [["{}{}{}{}{}".format(BLANKSECTION[i],scoreABpix[i],dashpix[i],scoreXYpix[i],BLANKSECTION[i])] for i in range(picounicorn.get_height())]
+        scorepix = [item.replace("X","P") for item in scoredict[self.score]]
+        fulldisplay = [["{}".format(scorepix[i])] for i in range(picounicorn.get_height())]
         return fulldisplay
     
     #Function to generate a 2D array of specified text e.g. "WIN!"
@@ -99,8 +82,8 @@ class PicoGames:
         fulldisplay = [["{} {} {} {}   ".format(text1[i],text2[i],text3[i],text4[i])] for i in range(picounicorn.get_height())]
         return fulldisplay
 
-    #Function to create the ball and ball trail(using previous ball co-ords)
-    def ball(self):
+    #Function to create the snake and trail(using previous co-ords)
+    def snake(self):
         # reassign ball position
         prevball2x=self.ballx-self.dirH
         prevball2y=self.bally-self.dirV
@@ -128,26 +111,6 @@ class PicoGames:
                     picounicorn.set_pixel(x, y, r, g, b)
         return self.ballx,self.bally,prevballx,prevbally,prevball2x,prevball2y
 
-    #Function to create playerAB paddle (in the first column)
-    def lightcontrolAB(self):
-        for x in range(1):
-            for y in self.listH:
-                if y in self.onlistAB:
-                    r,g,b = self.playerABcolours
-                else:
-                    r,g,b=0,0,0
-                picounicorn.set_pixel(x, y, r, g, b)
-    
-    #Function to create playerXY paddle (in the last column)
-    def lightcontrolXY(self):
-        for x in range(15,16):
-            for y in self.listH:
-                if y in self.onlistXY:
-                    r,g,b=self.playerXYcolours
-                else:
-                    r,g,b=0,0,0
-                picounicorn.set_pixel(x, y, r, g, b)
-    
     #Function to determine the ball colour & direction (based on it's position)and update scoring
     def ballposition(self):
         if self.ballx == self.listWball[0]:#if ball is in the furthest left column
@@ -219,24 +182,13 @@ class PicoGames:
                 self.bally = self.listHball[0]
         self.ball()
     
-    def mirrored_list(lst, mirrored=False):
-        """
-        A method used to determine if a list is never ending (ie mirrored) or not
-        (ie fixed at the extremes).
-        """
-        pass
-    
     def run_game(self):
         #Function which runs the game
         while True:
             self.ballposition()
-            if self.scoreAB >= self.winning_score or self.scoreXY >= self.winning_score:
-                if self.scoreAB >= self.winning_score:
-                    winningcolour="A"
-                else:
-                    winningcolour="Y"
+            if self.score >= self.winning_score:
                 cleardisplay()
-                currentdisplaymap=updatedisplay(self.generatemessage(winningcolour),
+                currentdisplaymap=updatedisplay(self.generatemessage("P"),
                                                 self.colourmap)
                 anyButton = False
                 while not anyButton:
@@ -250,9 +202,7 @@ class PicoGames:
                         anyButton = True
                 # reinitialise game
                 self.initialise_variables()
-                self.lightcontrolAB()
-                self.lightcontrolXY()
-                self.ball()
+                self.snake()
                 self.run_game()
             else:
                 if picounicorn.is_pressed(picounicorn.BUTTON_A):
@@ -283,8 +233,6 @@ class PicoGames:
                     elif self.onlistXY[-1] == 6 and self.inf_paddles:
                         self.onlistXY.insert(len(self.onlistXY),0)
                         self.onlistXY=self.onlistXY[1:]
-            self.lightcontrolAB()
-            self.lightcontrolXY()
             utime.sleep(0.1)
 
 if __name__ == "__main__":
