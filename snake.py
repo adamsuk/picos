@@ -12,7 +12,7 @@ class PicoGames:
         #Define setup variables
         self.score = 0
         self.alive = True
-        self.wall_reflect = False
+        self.wall_loop = False
         self.initialise_variables()
         
         # Define colours
@@ -49,6 +49,7 @@ class PicoGames:
         """
         A method used to initialise key variables for the game
         """
+        self.eaten = False
         self.startballx=7
         self.startbally=3
         self.startdirH=1
@@ -57,15 +58,8 @@ class PicoGames:
         self.snakey=[self.startbally,]
         self.dirH=self.startdirH
         self.dirV=self.startdirV
-
-        #Create lists of pixels for the height/width of the whole display/ball area
-        self.listW=[]#makes a list 0-15
-        for i in range(picounicorn.get_width()):
-            self.listW.append(i)
-
-        self.listH=[]#makes a list 0-6
-        for i in range(picounicorn.get_height()):
-            self.listH.append(i)
+        self.displayW = picounicorn.get_width() - 1
+        self.displayH = picounicorn.get_height() - 1
     
     #Function to generate an 2D array to represent the current score in the format: PlayerABscore - PlayerXYscore
     def generatescore(self):
@@ -84,11 +78,39 @@ class PicoGames:
 
     # Function used to determine the current snake position
     def snake_position(self):
-        # add to the snake list
-        self.snakex.append(self.snakex[-1] + self.dirH)
-        self.snakex = self.snakex[1:]
-        self.snakey.append(self.snakey[-1] + self.dirV)
-        self.snakey = self.snakey[1:]
+        # determine new x and y positions
+        new_x = self.snakex[-1] + self.dirH
+        new_y = self.snakey[-1] + self.dirV
+        # check for how to treat the wall
+        # X
+        if new_x < 0 or new_x > self.displayW:
+            if self.wall_loop:
+                if new_x < 0:
+                    new_x = self.displayW
+                else:
+                    new_x = 0
+                self.snakex.append(new_x)
+            else:
+                self.alive = False
+        else:
+            # add to the snake list
+            self.snakex.append(new_x)
+        # Y
+        if new_y < 0 or new_y > self.displayH:
+            if self.wall_loop:
+                if new_y < 0:
+                    new_y = self.displayH
+                else:
+                    new_y = 0
+                self.snakey.append(new_y)
+            else:
+                self.alive = False
+        else:
+            self.snakey.append(new_y)
+        # if fruit is not eaten move snake
+        if not self.eaten:
+            self.snakex = self.snakex[1:]
+            self.snakey = self.snakey[1:]
         print(self.snakex)
         print(self.snakey)
 
