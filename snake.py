@@ -10,7 +10,8 @@ class PicoGames:
         picounicorn.init()
 
         #Define setup variables
-        self.winning_score = 9
+        self.score = 0
+        self.alive = True
         self.wall_reflect = False
         self.initialise_variables()
         
@@ -26,13 +27,13 @@ class PicoGames:
                           }
 
         #Set constant variables for title
-        title=[["RRRRRRRRRRRRRRRR"],
-               ["RRRRRRRRRRRRRRRR"],
-               ["RRRRRRRRRRRRRRRR"],
-               ["RRRRRRRRRRRRRRRR"],
-               ["RRRRRRRRRRRRRRRR"],
-               ["RRRRRRRRRRRRRRRR"],
-               ["RRRRRRRRRRRRRRRR"]]
+        title=[["                "],
+               ["      RRR    R  "],
+               ["     R   R  R   "],
+               ["    R     RRRR  "],
+               [" RRR        R   "],
+               ["             R  "],
+               ["                "]]
             
         #Display the title screen for 2 seconds
         updatedisplay(title, self.colourmap)
@@ -52,11 +53,10 @@ class PicoGames:
         self.startbally=3
         self.startdirH=1
         self.startdirV=0
-        self.ballx=self.startballx
-        self.bally=self.startbally
+        self.snakex=[self.startballx,]
+        self.snakey=[self.startbally,]
         self.dirH=self.startdirH
         self.dirV=self.startdirV
-        self.score=0
 
         #Create lists of pixels for the height/width of the whole display/ball area
         self.listW=[]#makes a list 0-15
@@ -82,111 +82,31 @@ class PicoGames:
         fulldisplay = [["{} {} {} {}   ".format(text1[i],text2[i],text3[i],text4[i])] for i in range(picounicorn.get_height())]
         return fulldisplay
 
+    # Function used to determine the current snake position
+    def snake_position(self):
+        # add to the snake list
+        self.snakex.append(self.snakex[-1] + self.dirH)
+        self.snakex = self.snakex[1:]
+        self.snakey.append(self.snakey[-1] + self.dirV)
+        self.snakey = self.snakey[1:]
+        print(self.snakex)
+        print(self.snakey)
+
     #Function to create the snake and trail(using previous co-ords)
     def snake(self):
-        # reassign ball position
-        prevball2x=self.ballx-self.dirH
-        prevball2y=self.bally-self.dirV
-        prevballx=self.ballx
-        prevbally=self.bally
-        self.ballx=self.ballx+self.dirH
-        self.bally=self.bally+self.dirV
-        # determine colours
-        for x in self.listWball:
-            for y in self.listHball:
-                if x == self.ballx:
-                    if y == self.bally:
-                        r,g,b=self.ballcolours
-                        picounicorn.set_pixel(x, y, r, g, b)
-                elif x == prevballx:
-                    if y == prevbally:
-                        r,g,b=[round(element * 0.3) for element in self.ballcolours]
-                        picounicorn.set_pixel(x, y, r, g, b)
-                elif x == prevball2x:
-                    if y == prevball2y:
-                        r,g,b=[round(element * 0.2) for element in self.ballcolours]
-                        picounicorn.set_pixel(x, y, r, g, b)
-                else:
-                    r,g,b=0,0,0
-                    picounicorn.set_pixel(x, y, r, g, b)
-        return self.ballx,self.bally,prevballx,prevbally,prevball2x,prevball2y
-
-    #Function to determine the ball colour & direction (based on it's position)and update scoring
-    def ballposition(self):
-        if self.ballx == self.listWball[0]:#if ball is in the furthest left column
-            self.ballcolours=self.playerABcolours
-            if self.bally in self.onlistAB:
-                self.dirH=1
-                if self.bally == self.onlistAB[0] and self.dirV == 0:
-                    self.dirV = -1
-                elif self.bally == self.onlistAB[1]:
-                    self.dirV = 0
-                elif self.bally == self.onlistAB[-1] and self.dirV == 0:
-                    self.dirV = 1
-                elif self.bally in [self.listHball[0], self.listHball[-1]]:
-                    self.dirV *= -1
-            elif self.bally == self.onlistAB[0] -1 and self.dirV == 1:
-                self.dirH = 1
-                self.dirV = -1
-            elif self.bally == self.onlistAB[-1] +1 and self.dirV == -1:
-                self.dirH = 1
-                self.dirV = 1
-            else:
-                self.scoreXY+=1
-                self.startdirH=1
-                self.ballx=self.startballx
-                self.bally=self.startbally
-                self.dirH=self.startdirH
-                self.dirV=self.startdirV
-                cleardisplay()
-                updatedisplay(self.generatescore(), self.colourmap)
-                utime.sleep(1)
-        elif self.ballx == self.listWball[-1]:#if ball is in the furthest right column
-            self.ballcolours=self.playerXYcolours
-            if self.bally in self.onlistXY:
-                self.dirH=-1
-                if self.bally == self.onlistXY[0] and self.dirV == 0:
-                    self.dirV = -1
-                elif self.bally == self.onlistXY[1]:
-                    self.dirV = 0
-                elif self.bally == self.onlistXY[-1] and self.dirV == 0:
-                    self.dirV = 1
-                elif self.bally in [self.listHball[0], self.listHball[-1]]:
-                    self.dirV *= -1
-            elif self.bally == self.onlistXY[0] -1 and self.dirV == 1:
-                self.dirH = 1
-                self.dirV = -1
-            elif self.bally == self.onlistXY[-1] +1 and self.dirV == -1:
-                self.dirH = 1
-                self.dirV = 1
-            else:
-                self.scoreAB+=1
-                self.startdirH=- 1
-                self.ballx=self.startballx
-                self.bally=self.startbally
-                self.dirH=self.startdirH
-                self.dirV=self.startdirV
-                cleardisplay()
-                updatedisplay(self.generatescore(), self.colourmap)
-                utime.sleep(1)
-        # reflect off wall
-        elif self.ballx in self.listWball and self.wall_reflect:
-            if self.bally == self.listHball[0]:
-                self.dirV=1
-            elif self.bally == self.listHball[-1]:
-                self.dirV=-1
-        elif self.ballx in self.listWball and not self.wall_reflect:
-            if self.bally == self.listHball[0]:
-                self.bally = self.listHball[-1]
-            elif self.bally == self.listHball[-1]:
-                self.bally = self.listHball[0]
-        self.ball()
+        cleardisplay()
+        # determine snake position
+        self.snake_position()
+        # iterate over the snake list and display
+        for x in self.snakex:
+            for y in self.snakey:
+                r,g,b=self.ballcolours
+                picounicorn.set_pixel(x, y, r, g, b)
     
     def run_game(self):
         #Function which runs the game
         while True:
-            self.ballposition()
-            if self.score >= self.winning_score:
+            if not self.alive:
                 cleardisplay()
                 currentdisplaymap=updatedisplay(self.generatemessage("P"),
                                                 self.colourmap)
@@ -206,34 +126,23 @@ class PicoGames:
                 self.run_game()
             else:
                 if picounicorn.is_pressed(picounicorn.BUTTON_A):
-                    if self.onlistAB[0]!=0:
-                        self.onlistAB.insert(0,self.onlistAB[0]-1)
-                        self.onlistAB=self.onlistAB[:-1]
-                    elif self.onlistAB[0] == 0 and self.inf_paddles:
-                        self.onlistAB.insert(0,6)
-                        self.onlistAB=self.onlistAB[:-1]                        
+                    print("Up")
+                    self.dirV = -1
+                    self.dirH = 0
                 elif picounicorn.is_pressed(picounicorn.BUTTON_B):
-                    if self.onlistAB[-1]!=6:
-                        self.onlistAB.insert(len(self.onlistAB),self.onlistAB[-1]+1)
-                        self.onlistAB=self.onlistAB[1:]
-                    elif self.onlistAB[-1] == 6 and self.inf_paddles:
-                        self.onlistAB.insert(len(self.onlistAB),0)
-                        self.onlistAB=self.onlistAB[1:]
+                    print("Down")
+                    self.dirV = 1
+                    self.dirH = 0
                 if picounicorn.is_pressed(picounicorn.BUTTON_X):
-                    if self.onlistXY[0]!=0:
-                        self.onlistXY.insert(0,self.onlistXY[0]-1)
-                        self.onlistXY=self.onlistXY[:-1]
-                    elif self.onlistXY[0] == 0 and self.inf_paddles:
-                        self.onlistXY.insert(0,6)
-                        self.onlistXY=self.onlistXY[:-1]
+                    print("Left")
+                    self.dirV = 0
+                    self.dirH = 1
                 elif picounicorn.is_pressed(picounicorn.BUTTON_Y):
-                    if self.onlistXY[-1]!=6:
-                        self.onlistXY.insert(len(self.onlistXY),self.onlistXY[-1]+1)
-                        self.onlistXY=self.onlistXY[1:]
-                    elif self.onlistXY[-1] == 6 and self.inf_paddles:
-                        self.onlistXY.insert(len(self.onlistXY),0)
-                        self.onlistXY=self.onlistXY[1:]
+                    print("Right")
+                    self.dirV = 0
+                    self.dirH = -1
             utime.sleep(0.1)
+            self.snake()
 
 if __name__ == "__main__":
     PicoGames()
