@@ -3,7 +3,7 @@ import picounicorn
 import utime
 from alphanumerics import scoredict, textdict
 from display import cleardisplay, updatedisplay, scrolldisplay
-
+from common import random_int
 
 class PicoGames:
     def __init__(self):
@@ -12,7 +12,8 @@ class PicoGames:
         #Define setup variables
         self.score = 0
         self.alive = True
-        self.wall_loop = False
+        self.wall_loop = True
+        self.cannibal = False
         self.initialise_variables()
         
         # Define colours
@@ -27,19 +28,20 @@ class PicoGames:
                           }
 
         #Set constant variables for title
-        title=[["                "],
-               ["      RRR    R  "],
-               ["     R   R  R   "],
-               ["    R     RRRR  "],
-               [" RRR        R   "],
-               ["             R  "],
-               ["                "]]
+        title=[["RRR          RRR"],
+               ["R    R   R R R R"],
+               ["RRR      R R RRR"],
+               ["  RRRR   RR  R  "],
+               ["RRRR RRRRR RRRRR"],
+               ["   R RR R       "],
+               ["      RRRR      "]]
             
         #Display the title screen for 2 seconds
         updatedisplay(title, self.colourmap)
         utime.sleep(2)
 
-        #Initial invocation of "ball" function
+        # Initiate game piece methods
+        self.food_position()
         self.snake()
         
         # start the game!
@@ -49,17 +51,17 @@ class PicoGames:
         """
         A method used to initialise key variables for the game
         """
-        self.eaten = False
+        self.eaten = True
+        self.alive = True
         self.startballx=7
         self.startbally=3
         self.startdirH=1
         self.startdirV=0
         self.snakex=[self.startballx,]
         self.snakey=[self.startbally,]
-        self.dirH=self.startdirH
-        self.dirV=self.startdirV
         self.displayW = picounicorn.get_width() - 1
         self.displayH = picounicorn.get_height() - 1
+        self.string_to_direction("right", set_self=True)
     
     #Function to generate an 2D array to represent the current score in the format: PlayerABscore - PlayerXYscore
     def generatescore(self):
@@ -68,12 +70,25 @@ class PicoGames:
         return fulldisplay
     
     #Function to generate a 2D array of specified text e.g. "WIN!"
-    def generatemessage(self, winningcolour):
+    def generatemessage2(self, winningcolour, *args, **kwargs):
         text1=[item.replace("X",winningcolour) for item in textdict["W"]]
         text2=[item.replace("X",winningcolour) for item in textdict["I"]]
         text3=[item.replace("X",winningcolour) for item in textdict["N"]]
         text4=[item.replace("X",winningcolour) for item in textdict["!"]]
         fulldisplay = [["{} {} {} {}   ".format(text1[i],text2[i],text3[i],text4[i])] for i in range(picounicorn.get_height())]
+        print(fulldisplay)
+        return fulldisplay
+    
+    #Function to generate a 2D array of specified text e.g. the final score
+    def generatemessage(self, winningcolour, message):
+        BLANKSECTION= ["   " for i in range(self.displayH)]
+        text_lst = []
+        for char in message:
+            text_lst.append([item.replace("X",winningcolour) for item in scoredict[int(char)]])
+            text_lst.append(BLANKSECTION)
+        text_lst.append([item.replace("X",winningcolour) for item in textdict["!"]])
+        fulldisplay = [["".join(row) + ((self.displayW - len(row)) * " ")] for row in list(zip(*text_lst))]
+        print(fulldisplay)
         return fulldisplay
 
     # Function used to determine the current snake position
@@ -108,29 +123,105 @@ class PicoGames:
         else:
             self.snakey.append(new_y)
         # if fruit is not eaten move snake
+        self.snake_eating()
         if not self.eaten:
             self.snakex = self.snakex[1:]
             self.snakey = self.snakey[1:]
-        print(self.snakex)
-        print(self.snakey)
+        
+        # generate the score (x and y are identical in size)
+        self.score = len(self.snakex)
+
+        # check to see if you can eat yourself
+        if not self.cannibal:
+            if (self.snakex[-1], self.snakey[-1]) in list(zip(self.snakex[:-1], self.snakey[:-1])):
+                self.alive = False
+
+    def snake_eating(self):
+        """
+        A method used to determine if a snake is eating
+        """
+        if (self.snakex[-1] == self.foodx) and (self.snakey[-1] == self.foody):
+            self.eaten = True
+        else:
+            self.eaten = False
+
+    def food_position(self):
+        """
+        A method for randomly generating the food location
+        """
+        if self.eaten:
+            legal_position = False
+            while not legal_position:
+                self.foodx = random_int(self.displayW)
+                self.foody = random_int(self.displayH)
+                # check again the snake lists
+                if (self.foodx not in self.snakex) or (self.foody not in self.snakey):
+                    legal_position = True
+        picounicorn.set_pixel(self.foodx, self.foody, *self.colourmap["D"])
 
     #Function to create the snake and trail(using previous co-ords)
     def snake(self):
-        cleardisplay()
         # determine snake position
         self.snake_position()
         # iterate over the snake list and display
-        for x in self.snakex:
-            for y in self.snakey:
-                r,g,b=self.ballcolours
-                picounicorn.set_pixel(x, y, r, g, b)
+        for x, y in zip(self.snakex, self.snakey):
+            r,g,b=self.ballcolours
+            picounicorn.set_pixel(x, y, r, g, b)
+    
+    def direction_to_string(self, dirV=None, dirH=None, set_self=False):
+        """Converts vert and horz directions into a human readable string"""
+        if not dirV:
+            dirV = self.dirV
+        if not dirH:
+            dirH = self.dirH
+        if dirV == -1 and dirH == 0:
+            direction = "up"
+            opposite_direction = "down"
+        elif dirV == 1 and dirH == 0:
+            direction = "down"
+            opposite_direction = "up"
+        elif dirV == 0 and dirH == -1:
+            direction = "left"
+            opposite_direction = "right"
+        elif dirV == 0 and dirH == 1:
+            direction = "right"
+            opposite_direction = "left"
+        if set_self:
+            self.direction = direction
+            self.opposite_direction = opposite_direction
+        else:
+            return({"direction":direction,
+                    "opposite_direction":opposite_direction})
+    
+    def string_to_direction(self, direction=None, set_self=False):
+        """Converts a human readable string into vert and horz directions"""
+        if not direction:
+            direction = self.direction
+        if direction == "up":
+            dirV = -1
+            dirH = 0
+        elif direction == "down":
+            dirV = 1
+            dirH = 0
+        elif direction == "left":
+            dirV = 0
+            dirH = -1
+        elif direction == "right":
+            dirV = 0
+            dirH = 1
+        if set_self:
+            self.dirV = dirV
+            self.dirH = dirH
+        else:
+            return({"dirV":dirV,
+                    "dirH":dirH})
     
     def run_game(self):
         #Function which runs the game
         while True:
             if not self.alive:
                 cleardisplay()
-                currentdisplaymap=updatedisplay(self.generatemessage("P"),
+                currentdisplaymap=updatedisplay(self.generatemessage("P", str(self.score)),
                                                 self.colourmap)
                 anyButton = False
                 while not anyButton:
@@ -144,26 +235,25 @@ class PicoGames:
                         anyButton = True
                 # reinitialise game
                 self.initialise_variables()
+                self.food_position()
                 self.snake()
                 self.run_game()
             else:
                 if picounicorn.is_pressed(picounicorn.BUTTON_A):
-                    print("Up")
-                    self.dirV = -1
-                    self.dirH = 0
+                    if not self.direction_to_string()["opposite_direction"] == "up":
+                        self.string_to_direction(direction="up", set_self=True)
                 elif picounicorn.is_pressed(picounicorn.BUTTON_B):
-                    print("Down")
-                    self.dirV = 1
-                    self.dirH = 0
+                    if not self.direction_to_string()["opposite_direction"] == "down":
+                        self.string_to_direction(direction="down", set_self=True)
                 if picounicorn.is_pressed(picounicorn.BUTTON_X):
-                    print("Left")
-                    self.dirV = 0
-                    self.dirH = 1
+                    if not self.direction_to_string()["opposite_direction"] == "left":
+                        self.string_to_direction(direction="left", set_self=True)
                 elif picounicorn.is_pressed(picounicorn.BUTTON_Y):
-                    print("Right")
-                    self.dirV = 0
-                    self.dirH = -1
+                    if not self.direction_to_string()["opposite_direction"] == "right":
+                        self.string_to_direction(direction="right", set_self=True)
             utime.sleep(0.1)
+            cleardisplay()
+            self.food_position()
             self.snake()
 
 if __name__ == "__main__":
