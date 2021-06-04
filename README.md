@@ -4,6 +4,13 @@ This repo contains the resources and code needed to play games on the [Raspberry
 
 These games are written in Python and have been developed for MicroPython with the picounicorn package.
 
+### GAMES!
+
+Pong - a nice little competitive game between friends
+Snake - a decent distraction when trying to think through problems!
+
+https://user-images.githubusercontent.com/25231418/120858925-67ea7500-c57b-11eb-80c5-475175914e09.mp4
+
 ### Getting Started
 
 Assuming you have all the hardware setup (Pico, header pins and Unicorn display) you need to do the following as prerequisites to getting any Pico Unicorn code to run:
