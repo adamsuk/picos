@@ -7,6 +7,7 @@ These games are written in Python and have been developed for MicroPython with t
 ### GAMES!
 
 Pong - a nice little competitive game between friends
+
 Snake - a decent distraction when trying to think through problems!
 
 https://user-images.githubusercontent.com/25231418/120858925-67ea7500-c57b-11eb-80c5-475175914e09.mp4
