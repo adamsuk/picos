@@ -53,6 +53,7 @@ class PicoGames:
         """
         self.eaten = True
         self.alive = True
+        self.valid_button = False
         self.startballx=7
         self.startbally=3
         self.startdirH=1
@@ -62,33 +63,15 @@ class PicoGames:
         self.displayW = picounicorn.get_width() - 1
         self.displayH = picounicorn.get_height() - 1
         self.string_to_direction("right", set_self=True)
-    
-    #Function to generate an 2D array to represent the current score in the format: PlayerABscore - PlayerXYscore
-    def generatescore(self):
-        scorepix = [item.replace("X","P") for item in scoredict[self.score]]
-        fulldisplay = [["{}".format(scorepix[i])] for i in range(picounicorn.get_height())]
-        return fulldisplay
-    
-    #Function to generate a 2D array of specified text e.g. "WIN!"
-    def generatemessage2(self, winningcolour, *args, **kwargs):
-        text1=[item.replace("X",winningcolour) for item in textdict["W"]]
-        text2=[item.replace("X",winningcolour) for item in textdict["I"]]
-        text3=[item.replace("X",winningcolour) for item in textdict["N"]]
-        text4=[item.replace("X",winningcolour) for item in textdict["!"]]
-        fulldisplay = [["{} {} {} {}   ".format(text1[i],text2[i],text3[i],text4[i])] for i in range(picounicorn.get_height())]
-        print(fulldisplay)
-        return fulldisplay
-    
+
     #Function to generate a 2D array of specified text e.g. the final score
     def generatemessage(self, winningcolour, message):
-        BLANKSECTION= ["   " for i in range(self.displayH)]
+        BLANKSECTION= [" " for i in range(self.displayH)]
         text_lst = []
         for char in message:
             text_lst.append([item.replace("X",winningcolour) for item in scoredict[int(char)]])
             text_lst.append(BLANKSECTION)
-        text_lst.append([item.replace("X",winningcolour) for item in textdict["!"]])
         fulldisplay = [["".join(row) + ((self.displayW - len(row)) * " ")] for row in list(zip(*text_lst))]
-        print(fulldisplay)
         return fulldisplay
 
     # Function used to determine the current snake position
@@ -239,18 +222,23 @@ class PicoGames:
                 self.snake()
                 self.run_game()
             else:
-                if picounicorn.is_pressed(picounicorn.BUTTON_A):
+                self.valid_button = False
+                if picounicorn.is_pressed(picounicorn.BUTTON_A) and not self.valid_button:
                     if not self.direction_to_string()["opposite_direction"] == "up":
                         self.string_to_direction(direction="up", set_self=True)
-                elif picounicorn.is_pressed(picounicorn.BUTTON_B):
+                        self.valid_button = True
+                elif picounicorn.is_pressed(picounicorn.BUTTON_B) and not self.valid_button:
                     if not self.direction_to_string()["opposite_direction"] == "down":
                         self.string_to_direction(direction="down", set_self=True)
-                if picounicorn.is_pressed(picounicorn.BUTTON_X):
+                        self.valid_button = True
+                if picounicorn.is_pressed(picounicorn.BUTTON_X) and not self.valid_button:
                     if not self.direction_to_string()["opposite_direction"] == "left":
                         self.string_to_direction(direction="left", set_self=True)
-                elif picounicorn.is_pressed(picounicorn.BUTTON_Y):
+                        self.valid_button = True
+                elif picounicorn.is_pressed(picounicorn.BUTTON_Y) and not self.valid_button:
                     if not self.direction_to_string()["opposite_direction"] == "right":
                         self.string_to_direction(direction="right", set_self=True)
+                        self.valid_button = True
             utime.sleep(0.1)
             cleardisplay()
             self.food_position()
