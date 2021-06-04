@@ -1,3 +1,5 @@
+import random
+
 # From CPython Lib/colorsys.py
 def hsv_to_rgb(h, s, v):
     if s == 0.0:
@@ -20,4 +22,7 @@ def hsv_to_rgb(h, s, v):
         return t, p, v
     if i == 5:
         return v, p, q
-        
+
+def random_int(scale=1):
+    """A method used to obtain a random integer"""
+    return(round(random.random() * scale))
