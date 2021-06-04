@@ -16,3 +16,9 @@ I personally use Thonny on a Raspberry Pi 4 because it completely simplifies the
 ### Running Code!
 
 The Pico works in a really simplistic way. Anything uploaded to the root called `main.py` will be ran automatically.
+
+Currently both `pong.py` and `snake.py` can be ran on a Pico by uploading them as `main.py`. These game require the other python scripts in this repo to run (upload the remaining scripts without altering the filenames).
+
+### Thanks
+
+Firstly I need to give a shout out to pippayy and her [PONG.py](https://github.com/pippayyy/PONG) code. Without stumbling on her [LinkedIn video](https://www.linkedin.com/posts/pip-austin-222615173_raspberrypi-python-ugcPost-6797972161341530112-oWUq/?src=aff-lilpar&veh=aff_src.aff-lilpar_c.partners_pkw.10078_plc.Skimbit%20Ltd._pcrid.449670_learning&trk=aff_src.aff-lilpar_c.partners_pkw.10078_plc.Skimbit%20Ltd._pcrid.449670_learning&clickid=QtjQA5QlNxyLTxPwUx0Mo3EoUkBw2kyph37dRs0&irgwc=1) I wouldn't have started this project and the Picos I preordered would've gathered dust for a little while longer. I used her project as a starter for 10, did a little refactoring, fixed a couple of bugs then got to work on my own take on a classic :)
