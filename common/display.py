@@ -1,5 +1,5 @@
 import picounicorn
-from common import hsv_to_rgb
+from .common import hsv_to_rgb
 
 #Function to clear display by setting pixels to black
 def cleardisplay():

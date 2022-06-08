@@ -1,9 +1,11 @@
-#Import libraries
 import picounicorn
 import utime
-from alphanumerics import scoredict, textdict
-from display import cleardisplay, updatedisplay, scrolldisplay
-from common import random_int
+
+# this sucks - need to look into better imports
+import sys
+sys.path.append("..")
+
+from common import scoredict, textdict, cleardisplay, updatedisplay, scrolldisplay, random_int
 
 class PicoGames:
     def __init__(self):
@@ -51,6 +53,7 @@ class PicoGames:
         """
         A method used to initialise key variables for the game
         """
+        self.exit_game = False
         self.eaten = True
         self.alive = True
         self.valid_button = False
@@ -201,7 +204,7 @@ class PicoGames:
     
     def run_game(self):
         #Function which runs the game
-        while True:
+        while not self.exit_game:
             if not self.alive:
                 cleardisplay()
                 currentdisplaymap=updatedisplay(self.generatemessage("P", str(self.score)),
@@ -215,7 +218,11 @@ class PicoGames:
                         picounicorn.is_pressed(picounicorn.BUTTON_B) or \
                             picounicorn.is_pressed(picounicorn.BUTTON_X) or \
                                 picounicorn.is_pressed(picounicorn.BUTTON_Y):
+                        self.exit_game = True
                         anyButton = True
+                
+                if self.exit_game:
+                    break
                 # reinitialise game
                 self.initialise_variables()
                 self.food_position()
@@ -239,10 +246,18 @@ class PicoGames:
                     if not self.direction_to_string()["opposite_direction"] == "right":
                         self.string_to_direction(direction="right", set_self=True)
                         self.valid_button = True
+                if picounicorn.is_pressed(picounicorn.BUTTON_A) and \
+                        picounicorn.is_pressed(picounicorn.BUTTON_X):
+                    self.exit_game = True
+                if self.exit_game:
+                    break
             utime.sleep(0.1)
             cleardisplay()
             self.food_position()
             self.snake()
+
+def main():
+    PicoGames()
 
 if __name__ == "__main__":
     PicoGames()

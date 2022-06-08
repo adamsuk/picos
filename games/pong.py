@@ -1,8 +1,10 @@
-#Import libraries
 import picounicorn
 import utime
-from alphanumerics import scoredict, textdict
-from display import cleardisplay, updatedisplay, scrolldisplay
+# this sucks - need to look into better imports
+import sys
+sys.path.append("..")
+
+from common import scoredict, textdict, cleardisplay, updatedisplay, scrolldisplay
 
 
 class PicoGames:
@@ -11,8 +13,8 @@ class PicoGames:
 
         #Define setup variables
         self.winning_score = 9
-        self.inf_paddles = True
-        self.wall_reflect = False
+        self.inf_paddles = False
+        self.wall_reflect = True
         self.initialise_variables()
         
         # Define colours
@@ -51,6 +53,7 @@ class PicoGames:
         """
         A method used to initialise key variables for the game
         """
+        self.exit_game = False
         self.startballx=7
         self.startbally=3
         self.startdirH=1
@@ -212,11 +215,6 @@ class PicoGames:
                 self.dirV=1
             elif self.bally == self.listHball[-1]:
                 self.dirV=-1
-        elif self.ballx in self.listWball and not self.wall_reflect:
-            if self.bally == self.listHball[0]:
-                self.bally = self.listHball[-1]
-            elif self.bally == self.listHball[-1]:
-                self.bally = self.listHball[0]
         self.ball()
     
     def mirrored_list(lst, mirrored=False):
@@ -228,7 +226,7 @@ class PicoGames:
     
     def run_game(self):
         #Function which runs the game
-        while True:
+        while not self.exit_game:
             self.ballposition()
             if self.scoreAB >= self.winning_score or self.scoreXY >= self.winning_score:
                 if self.scoreAB >= self.winning_score:
@@ -244,10 +242,12 @@ class PicoGames:
                                                     self.colourmap)
                     utime.sleep(0.1)
                     if picounicorn.is_pressed(picounicorn.BUTTON_A) or \
-                        picounicorn.is_pressed(picounicorn.BUTTON_B) or \
-                            picounicorn.is_pressed(picounicorn.BUTTON_X) or \
-                                picounicorn.is_pressed(picounicorn.BUTTON_Y):
+                            picounicorn.is_pressed(picounicorn.BUTTON_X):
+                        self.exit_game = True
                         anyButton = True
+                
+                if self.exit_game:
+                    break
                 # reinitialise game
                 self.initialise_variables()
                 self.lightcontrolAB()
@@ -283,9 +283,18 @@ class PicoGames:
                     elif self.onlistXY[-1] == 6 and self.inf_paddles:
                         self.onlistXY.insert(len(self.onlistXY),0)
                         self.onlistXY=self.onlistXY[1:]
+                # exit game
+                if picounicorn.is_pressed(picounicorn.BUTTON_A) and \
+                        picounicorn.is_pressed(picounicorn.BUTTON_X):
+                    self.exit_game = True
+                if self.exit_game:
+                    break
             self.lightcontrolAB()
             self.lightcontrolXY()
             utime.sleep(0.1)
+
+def main():
+    PicoGames()
 
 if __name__ == "__main__":
     PicoGames()
